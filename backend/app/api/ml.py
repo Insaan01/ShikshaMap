@@ -1,12 +1,9 @@
 from fastapi import APIRouter, Depends
-from backend.app.core.ml_model import predictor
-from backend.app.api.deps import get_current_user
-from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from backend.app.core.database import get_db
-from backend.app.models import Region, RegionMetric
-from backend.app.core.ml_model import predictor
-from backend.app.api.deps import get_current_user
+from app.core.database import get_db
+from app.models import Region, RegionMetric
+from app.core.ml_model import predictor
+from app.api.deps import get_current_user
 
 
 router = APIRouter()
