@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, map, ml
-from app.api import auth, map, ml, admin # Add admin here
+from backend.app.api import auth, map, ml
+from backend.app.api import auth, map, ml, admin # Add admin here
 
 
 app = FastAPI(title="ShikshaMap GeoAI API")

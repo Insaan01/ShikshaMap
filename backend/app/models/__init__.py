@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from geoalchemy2 import Geometry
-from app.core.database import Base
+from backend.app.core.database import Base
 
 
 class Organization(Base):

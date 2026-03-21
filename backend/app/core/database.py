@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from app.core.config import settings
+from backend.app.core.config import settings
 
 # Added connect_args to FORCE a timeout if MySQL is ghosting Python
 engine = create_engine(

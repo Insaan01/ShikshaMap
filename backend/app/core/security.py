@@ -1,7 +1,7 @@
 import bcrypt
 from datetime import datetime, timedelta
 from jose import jwt
-from app.core.config import settings
+from backend.app.core.config import settings
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
