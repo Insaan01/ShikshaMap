@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, map, ml, admin
+from app.api import auth, map, ml, admin, ngo
 
-app = FastAPI(title="ShikshaMap GeoAI API")
+app = FastAPI()
 
-# Define the origins that are allowed to talk to this API
-# During development, this is your Next.js local URL
+# Add BOTH localhost and the IP address
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -15,9 +14,10 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"], # Allows GET, POST, PUT, DELETE, etc.
-    allow_headers=["*"], # Allows all headers (like Authorization)
+    allow_methods=["*"], # Allows GET, POST, etc.
+    allow_headers=["*"], # Allows Authorization headers
 )
+
 
 @app.get("/")
 def health_check():
@@ -28,3 +28,5 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(map.router, prefix="/api/map", tags=["Map Intelligence"])
 app.include_router(ml.router, prefix="/api/ml", tags=["GeoAI Intelligence"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Data Management"])
+app.include_router(ngo.router, prefix="/api/ngo", tags=["NGO"])
+app.include_router(map.router, prefix="/api/map", tags=["Map"])
