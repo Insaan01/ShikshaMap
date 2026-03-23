@@ -1,32 +1,21 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, map, ml, admin, ngo
+from app.api import map as map_router
+from app.db.base_class import Base
+from app.db.session import engine
 
 app = FastAPI()
 
-# Add BOTH localhost and the IP address
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+# Sync models to DB on startup
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["*"], # Allows GET, POST, etc.
-    allow_headers=["*"], # Allows Authorization headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-
-@app.get("/")
-def health_check():
-    return {"status": "active", "project": "GeoAI Learning Poverty Index"}
-
-# Register your routers
-app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
-app.include_router(map.router, prefix="/api/map", tags=["Map Intelligence"])
-app.include_router(ml.router, prefix="/api/ml", tags=["GeoAI Intelligence"])
-app.include_router(admin.router, prefix="/api/admin", tags=["Data Management"])
-app.include_router(ngo.router, prefix="/api/ngo", tags=["NGO"])
-app.include_router(map.router, prefix="/api/map", tags=["Map"])
+# Use the aliased router name
+app.include_router(map_router.router, prefix="/api/map", tags=["Map Intelligence"])

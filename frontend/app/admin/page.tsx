@@ -27,7 +27,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white p-12 sm:p-20">
-      {/* Go Back Button */}
       <button
         onClick={() => router.push("/")}
         className="group flex items-center gap-2 text-white/40 hover:text-white transition-colors mb-12 uppercase text-[10px] font-bold tracking-widest"

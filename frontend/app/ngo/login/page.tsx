@@ -19,11 +19,9 @@ export default function NGOLogin() {
     const data = await res.json();
 
     if (res.ok) {
-      // Save the NGO name in local storage so the landing page can welcome them
       localStorage.setItem("ngoName", data.org_name);
       router.push("/landingPage");
     } else {
-      // Use data.detail because that is the FastAPI standard
       alert(data.detail || "Login Failed. Please check your credentials.");
     }
   };

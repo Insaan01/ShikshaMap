@@ -79,3 +79,21 @@ def login_ngo(payload: dict, db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Access Denied: Your account is pending Admin approval.")
 
     return {"message": "Login Successful", "org_name": ngo.org_name}
+
+
+@router.get("/district/{district_name}")
+def get_ngos_by_district(district_name: str, db: Session = Depends(get_db)):
+    # Case-insensitive search for NGOs in this district
+    ngos = db.query(Organization).filter(
+        Organization.district.ilike(f"%{district_name}%"),
+        Organization.is_approved == True
+    ).all()
+
+    return [
+        {
+            "org_name": ngo.org_name,
+            "org_type": ngo.org_type,
+            "focus_areas": ngo.focus_areas,  # Ensure this column exists or map it
+            "website": ngo.website
+        } for ngo in ngos
+    ]

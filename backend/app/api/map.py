@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+
+from app.models.map import District
 from app.models.ngo import Organization, StateMetric
 from app.schemas import StateDataResponse, MetricResponse
 from app.api.deps import get_current_user
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.core.database import get_db
+
 router = APIRouter()
 
 @router.get("/state-metrics")
@@ -49,9 +52,13 @@ def get_state_metrics(
         "metrics": formatted_metrics
     }
 
+
 @router.get("/state/{state_name}/districts")
-def get_district_metrics(state_name: str, db: Session = Depends(get_db)):
-    state = db.query(StateMetric).filter(StateMetric.state_name == state_name).first()
-    if not state:
-        return []
-    return state.districts
+def get_districts(state_name: str, db: Session = Depends(get_db)):
+    # Standardize the name for the SQL query
+    clean_name = state_name.replace("-", " ").title()
+
+    # Use the 'db' session to query the District table
+    districts = db.query(District).filter(District.state_name == clean_name).all()
+
+    return districts

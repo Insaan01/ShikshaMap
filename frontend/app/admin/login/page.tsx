@@ -9,7 +9,6 @@ export default function AdminLogin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple hardware-coded check for now as requested
     if (password === "admin123") {
       router.push("/admin");
     } else {
