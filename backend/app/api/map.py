@@ -48,3 +48,10 @@ def get_state_metrics(
         "state_name": state_name,
         "metrics": formatted_metrics
     }
+
+@router.get("/state/{state_name}/districts")
+def get_district_metrics(state_name: str, db: Session = Depends(get_db)):
+    state = db.query(StateMetric).filter(StateMetric.state_name == state_name).first()
+    if not state:
+        return []
+    return state.districts

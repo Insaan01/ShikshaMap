@@ -1,46 +1,33 @@
 from app.core.database import SessionLocal
-from app.models.ngo import StateMetric
+from app.models.ngo import StateMetric, DistrictMetric
 
 
-def seed_database():
-    print("Starting database seed for the new Map engine...")
+def seed_districts():
     db = SessionLocal()
-
     try:
-        # Check if we already have data
-        if db.query(StateMetric).first():
-            print("Database already contains state metrics. Skipping seed.")
-            return
+        # 1. Find Maharashtra in the DB
+        mh = db.query(StateMetric).filter(StateMetric.state_name == "Maharashtra").first()
 
-        # Simplified state-level data for the Landing Page Map
-        states_data = [
-            {"name": "Madhya Pradesh", "schools": "1.2k", "lit": "70.6%", "pov": "32%", "ngos": 72},
-            {"name": "Maharashtra", "schools": "2.5k", "lit": "82.3%", "pov": "17%", "ngos": 120},
-            {"name": "Uttar Pradesh", "schools": "1.8k", "lit": "67.7%", "pov": "37%", "ngos": 84},
-            {"name": "Delhi", "schools": "320", "lit": "86.2%", "pov": "9%", "ngos": 68},
-            {"name": "Gujarat", "schools": "920", "lit": "79.3%", "pov": "17%", "ngos": 95},
-            {"name": "Bihar", "schools": "850", "lit": "61.8%", "pov": "51%", "ngos": 42}
-        ]
-
-        for s in states_data:
-            new_state = StateMetric(
-                state_name=s["name"],
-                schools_needing_aid=s["schools"],
-                literacy_rate=s["lit"],
-                poverty_gap=s["pov"],
-                active_ngos=s["ngos"]
-            )
-            db.add(new_state)
-
-        db.commit()
-        print("Successfully seeded the India Map with real-time metrics!")
+        if mh and not mh.districts:
+            print("Seeding districts for Maharashtra...")
+            districts = [
+                DistrictMetric(state_id=mh.id, district_name="Mumbai City", schools="450", literacy="89.2%",
+                               poverty="12%"),
+                DistrictMetric(state_id=mh.id, district_name="Pune", schools="380", literacy="86.1%", poverty="15%"),
+                DistrictMetric(state_id=mh.id, district_name="Nagpur", schools="290", literacy="84.3%", poverty="18%"),
+            ]
+            db.add_all(districts)
+            db.commit()
+            print("Successfully added Maharashtra districts!")
+        else:
+            print("Maharashtra districts already exist or state not found.")
 
     except Exception as e:
-        print(f"Error seeding database: {e}")
+        print(f"Error: {e}")
         db.rollback()
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    seed_database()
+    seed_districts()

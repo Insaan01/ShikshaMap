@@ -42,57 +42,27 @@ const STATE_ID_TO_NAME: Record<string, string> = {
   INLD: "Lakshadweep",
 };
 
-// Accurately split by geography to form the Indian Flag
 const STATE_COLORS: Record<string, string> = {
-  // Top Band - Saffron
-  INJK: "#FF9933",
-  INLA: "#FF9933",
-  INHP: "#FF9933",
-  INPB: "#FF9933",
-  INCH: "#FF9933",
-  INUT: "#FF9933",
-  INHR: "#FF9933",
-  INDL: "#FF9933",
-  INRJ: "#FF9933",
-  INUP: "#FF9933",
-  INBR: "#FF9933",
-  INSK: "#FF9933",
-  INAR: "#FF9933",
-  INAS: "#FF9933",
-  INNL: "#FF9933",
-  // Middle Band - White
-  INGJ: "#FFFFFF",
-  INMP: "#FFFFFF",
-  INCT: "#FFFFFF",
-  INJH: "#FFFFFF",
-  INWB: "#FFFFFF",
-  INDH: "#FFFFFF",
-  INML: "#FFFFFF",
-  INTR: "#FFFFFF",
-  INMZ: "#FFFFFF",
-  INMN: "#FFFFFF",
-  // Bottom Band - Green
-  INMH: "#138808",
-  INOR: "#138808",
-  INTG: "#138808",
-  INAP: "#138808",
-  INKA: "#138808",
-  INGA: "#138808",
-  INKL: "#138808",
-  INTN: "#138808",
-  INPY: "#138808",
-  INAN: "#138808",
+  INJK: "#FF9933", INLA: "#FF9933", INHP: "#FF9933", INPB: "#FF9933", INCH: "#FF9933",
+  INUT: "#FF9933", INHR: "#FF9933", INDL: "#FF9933", INRJ: "#FF9933", INUP: "#FF9933",
+  INBR: "#FF9933", INSK: "#FF9933", INAR: "#FF9933", INAS: "#FF9933", INNL: "#FF9933",
+  INGJ: "#FFFFFF", INMP: "#FFFFFF", INCT: "#FFFFFF", INJH: "#FFFFFF", INWB: "#FFFFFF",
+  INDH: "#FFFFFF", INML: "#FFFFFF", INTR: "#FFFFFF", INMZ: "#FFFFFF", INMN: "#FFFFFF",
+  INMH: "#138808", INOR: "#138808", INTG: "#138808", INAP: "#138808", INKA: "#138808",
+  INGA: "#138808", INKL: "#138808", INTN: "#138808", INPY: "#138808", INAN: "#138808",
   INLD: "#138808",
 };
 
 interface IndiaMapProps {
   hoveredState: string | null;
   setHoveredState: (state: string | null) => void;
+  onStateClick: (state: string) => void; // Added for drill-down
 }
 
 export default function IndiaMap({
   hoveredState,
   setHoveredState,
+  onStateClick,
 }: IndiaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const prevHoveredIdRef = useRef<string | null>(null);
@@ -104,7 +74,6 @@ export default function IndiaMap({
         .replace(/width="[^"]*"/g, "")
         .replace(/height="[^"]*"/g, "")
         .replace(/viewBox="[^"]*"/g, "")
-        // THIS is the crucial fix: Strip out any hardcoded fills in the original SVG
         .replace(/fill="[^"]*"/g, "")
         .replace(
           /<svg /,
@@ -114,20 +83,16 @@ export default function IndiaMap({
   }, []);
 
   const applyHoverStyle = (path: SVGPathElement) => {
-    path.parentNode?.appendChild(path); // Bring to front
-
+    path.parentNode?.appendChild(path);
     const id = path.id;
-    // Force the style via JS so the SVG can't override it
     path.style.fill = STATE_COLORS[id] || "#FFFFFF";
     path.style.stroke = "#FFFFFF";
     path.style.strokeWidth = "2.5px";
-    path.style.filter =
-      "drop-shadow(0px 8px 16px rgba(0,0,0,0.8)) brightness(1.15)";
+    path.style.filter = "drop-shadow(0px 8px 16px rgba(0,0,0,0.8)) brightness(1.15)";
   };
 
   const applyDefaultStyle = (path: SVGPathElement) => {
     const id = path.id;
-    // Apply the geographic flag color
     path.style.fill = STATE_COLORS[id] || "#FFFFFF";
     path.style.stroke = "rgba(0,0,0,0.2)";
     path.style.strokeWidth = "1px";
@@ -137,7 +102,6 @@ export default function IndiaMap({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const svg = container.querySelector("svg");
     if (!svg) return;
 
@@ -145,28 +109,22 @@ export default function IndiaMap({
     paths.forEach((path) => {
       const id = path.id;
       if (!STATE_ID_TO_NAME[id]) return;
-
       const pathEl = path as SVGPathElement;
       applyDefaultStyle(pathEl);
-
       pathEl.style.cursor = "pointer";
-      pathEl.style.transition =
-        "fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease";
+      pathEl.style.transition = "fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease";
     });
   }, []);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
     const svg = container.querySelector("svg");
     if (!svg) return;
 
     const prevId = prevHoveredIdRef.current;
     const currentId = hoveredState
-      ? Object.keys(STATE_ID_TO_NAME).find(
-          (k) => STATE_ID_TO_NAME[k] === hoveredState,
-        ) || null
+      ? Object.keys(STATE_ID_TO_NAME).find((k) => STATE_ID_TO_NAME[k] === hoveredState) || null
       : null;
 
     if (prevId && prevId !== currentId) {
@@ -192,6 +150,16 @@ export default function IndiaMap({
     }
   };
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as SVGPathElement;
+    if (target.tagName.toLowerCase() === "path" && target.id) {
+      const stateName = STATE_ID_TO_NAME[target.id];
+      if (stateName) {
+        onStateClick(stateName); // Trigger the drill-down
+      }
+    }
+  };
+
   const handleMouseLeave = () => {
     setHoveredState(null);
   };
@@ -202,6 +170,7 @@ export default function IndiaMap({
         ref={containerRef}
         className="w-full h-full [&>svg]:w-full [&>svg]:h-auto"
         onMouseOver={handleMouseOver}
+        onClick={handleClick}
         onMouseLeave={handleMouseLeave}
         dangerouslySetInnerHTML={{ __html: processedSvgContent }}
       />
@@ -215,7 +184,7 @@ export default function IndiaMap({
             transition={{ duration: 0.15 }}
             className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md px-4 py-1 rounded-full border border-white/20 pointer-events-none"
           >
-            <p className="text-white text-xs font-semibold tracking-wide">
+            <p className="text-white text-[10px] font-bold uppercase tracking-widest">
               {hoveredState}
             </p>
           </motion.div>
