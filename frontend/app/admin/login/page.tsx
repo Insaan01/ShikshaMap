@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, Lock, ArrowRight } from "lucide-react";
+import { LoginForm } from "@/components/ui/login-form";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");

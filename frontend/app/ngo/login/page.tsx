@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock, ArrowRight, ArrowLeft } from "lucide-react";
+import { LoginForm } from "@/components/ui/login-form";
 
 export default function NGOLogin() {
   const [email, setEmail] = useState("");
