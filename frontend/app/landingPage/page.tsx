@@ -13,7 +13,21 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import IndiaMap from "../../components/IndiaMap";
-import DistrictMap from "../../components/DistrictMap";
+import MadhyaPradesh from "../../components/MadhyaPradeshMap";
+
+// --- DUMMY DATA DICTIONARY ---
+// This acts as a fallback while your API is being built.
+const DUMMY_DISTRICT_STATS: Record<string, { schools: string; literacy: string; poverty: string }> = {
+  Bhopal: { schools: "1,245", literacy: "80.37%", poverty: "12.4%" },
+  Indore: { schools: "1,890", literacy: "80.87%", poverty: "10.2%" },
+  Gwalior: { schools: "1,102", literacy: "76.65%", poverty: "15.1%" },
+  Jabalpur: { schools: "1,450", literacy: "81.07%", poverty: "11.8%" },
+  Ujjain: { schools: "980", literacy: "72.34%", poverty: "18.3%" },
+  Sagar: { schools: "1,340", literacy: "76.46%", poverty: "14.5%" },
+  Rewa: { schools: "1,120", literacy: "71.62%", poverty: "19.2%" },
+  Satna: { schools: "1,050", literacy: "72.26%", poverty: "17.8%" },
+  Default: { schools: "850", literacy: "68.50%", poverty: "16.0%" }
+};
 
 export default function LandingPage() {
   const router = useRouter();
@@ -85,10 +99,21 @@ export default function LandingPage() {
 
   // --- DISTRICT VIEW (Drill-down) ---
   if (selectedState) {
-    // Case-insensitive matching + Fallback to State-level metrics if no district hovered
-    const currentMetrics = districts.find(
+    // Priority 1: Check actual API data for the hovered district
+    const apiDistrictMetrics = districts.find(
       d => d.district_name.toLowerCase() === hoveredState?.toLowerCase()
-    ) || stateData[selectedState] || { schools: "--", literacy: "--", poverty: "--" };
+    );
+
+    // Priority 2: Use Dummy Data if hovered, falling back to 'Default' dummy numbers
+    const dummyDistrictMetrics = hoveredState
+      ? (DUMMY_DISTRICT_STATS[hoveredState] || DUMMY_DISTRICT_STATS.Default)
+      : null;
+
+    // Priority 3: Fallback to State-level metrics if nothing is hovered
+    const stateMetricsFallback = stateData[selectedState] || { schools: "--", literacy: "--", poverty: "--" };
+
+    // Set the metrics to display!
+    const currentMetrics = apiDistrictMetrics || dummyDistrictMetrics || stateMetricsFallback;
 
     return (
       <main className="bg-black min-h-screen p-8 sm:p-20 relative overflow-hidden text-white">
@@ -131,13 +156,15 @@ export default function LandingPage() {
           </div>
 
           <div className="flex-1 w-full">
-            <DistrictMap
+            <MadhyaPradesh
               stateName={selectedState}
               hoveredDistrict={hoveredState}
               setHoveredDistrict={setHoveredState}
               onDistrictClick={(name) => {
-                const data = districts.find(d => d.district_name.toLowerCase() === name.toLowerCase());
-                if(data) setSelectedDistrict(data);
+                // Allows mock clicking while API is down
+                const data = districts.find(d => d.district_name.toLowerCase() === name.toLowerCase())
+                  || { district_name: name, schools: DUMMY_DISTRICT_STATS[name]?.schools || "850", literacy: DUMMY_DISTRICT_STATS[name]?.literacy || "68.5%" };
+                if (data) setSelectedDistrict(data);
               }}
             />
           </div>
@@ -278,7 +305,7 @@ export default function LandingPage() {
 
 function StatCard({ icon: Icon, label, value, color, isActive }: { icon: any; label: string; value: string | number; color: string; isActive: boolean; }) {
   return (
-    <motion.div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 group transition-all hover:bg-white/[0.04]">
+    <motion.div className={`p-6 rounded-2xl border transition-all duration-300 ${isActive ? 'bg-white/[0.06] border-white/10' : 'bg-white/[0.02] border-white/5'} hover:bg-white/[0.08]`}>
       <Icon className={`w-5 h-5 mb-4 ${color} opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
       <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-1">{label}</p>
       <p className="text-2xl font-bold text-white">{value}</p>
