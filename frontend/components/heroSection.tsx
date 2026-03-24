@@ -71,9 +71,9 @@ export default function HeroSection() {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [isNavigating, setIsNavigating] = useState(false);
   const totalSteps = 4;
 
-  // Central State to prevent data loss across steps
   const [formState, setFormState] = useState({
     orgName: "", email: "", password: "", regNumber: "", orgType: "",
     yearFounded: "", contactName: "", phone: "", designation: "",
@@ -94,6 +94,13 @@ export default function HeroSection() {
     setCurrentStep(1);
   };
 
+  const handleNavigation = (path: string) => {
+    setIsNavigating(true);
+    setTimeout(() => {
+      router.push(path);
+    }, 800);
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -101,6 +108,8 @@ export default function HeroSection() {
       setCurrentStep(currentStep + 1);
       return;
     }
+
+    setIsNavigating(true);
 
     const payload = {
       ...formState,
@@ -117,13 +126,16 @@ export default function HeroSection() {
 
       if (response.ok) {
         setIsExpanded(false);
-        router.push("/landingPage");
+        setTimeout(() => router.push("/landingPage"), 800);
       } else {
         const errorData = await response.json();
+        setIsNavigating(false);
         alert(`Registration Error: ${errorData.detail || "Please check all fields."}`);
       }
     } catch (error) {
       console.error("API Error:", error);
+      setIsExpanded(false);
+      setTimeout(() => router.push("/landingPage"), 800);
     }
   };
 
@@ -141,24 +153,71 @@ export default function HeroSection() {
 
   return (
     <>
-      {/* Top Right Navigation */}
+      <AnimatePresence>
+        {isNavigating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md pointer-events-none flex flex-col items-center justify-center gap-6"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+              className="relative w-16 h-16 flex items-center justify-center"
+            >
+              <motion.span
+                className="absolute inset-0 border-4 border-transparent rounded-full"
+                animate={{
+                  borderTopColor: ["#FF9933", "#FFFFFF", "#138808", "#FF9933"],
+                  borderRightColor: ["#FF9933", "#FFFFFF", "#138808", "#FF9933"]
+                }}
+                transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+              />
+            </motion.div>
+            <motion.p
+              animate={{ opacity: [0.4, 1, 0.4] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+              className="text-white/80 text-xs font-bold tracking-[0.3em] uppercase"
+            >
+              Connecting to Bharat...
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="absolute top-8 right-8 z-[110] flex items-center gap-4">
-        <button
-          onClick={() => router.push("/landingPage")}
-          className="px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white/50 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all"
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => handleNavigation("/landingPage")}
+          className="px-6 py-2 rounded-full bg-white/5 border border-white/10 text-white/50 text-[10px] font-bold uppercase tracking-widest hover:bg-white/10 hover:text-white transition-colors"
         >
           Guest Explore
-        </button>
-        <button
-          onClick={() => router.push("/admin/login")}
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-orange-500/20 group transition-all"
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => handleNavigation("/admin/login")}
+          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-orange-500/20 group transition-colors"
         >
           <ShieldCheck className="w-5 h-5 text-white/30 group-hover:text-orange-500 transition-colors" />
-        </button>
+        </motion.button>
       </div>
 
       <section className="relative flex min-h-screen flex-col items-center justify-center px-6 py-12 bg-black overflow-hidden">
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#0a0a0a] to-black" />
+
+        {/* Improvised Vibrant Tricolor God Rays */}
+        <CustomGodRays />
+
+        <motion.div
+          animate={{ opacity: 0.05, rotate: 360 }}
+          transition={{ rotate: { duration: 150, repeat: Infinity, ease: "linear" } }}
+          className="absolute z-0 pointer-events-none"
+        >
+          <AshokaChakra size={900} color="#AAAAAA" />
+        </motion.div>
 
         <motion.div variants={containerVariants} initial="hidden" animate="visible" className="relative z-10 flex flex-col items-center gap-8 text-center max-w-5xl mx-auto">
           <motion.div variants={itemVariants} className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
@@ -179,17 +238,23 @@ export default function HeroSection() {
                 variants={itemVariants}
                 layoutId="modal"
                 onClick={handleExpand}
-                className="h-16 px-10 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-4 transition-all active:scale-95"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="group h-16 px-10 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-4 shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-shadow duration-300 relative overflow-hidden"
               >
-                Register NGO <ArrowRight className="w-5 h-5" />
+                Register NGO
+                <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1.5" />
               </motion.button>
 
               <motion.button
                 variants={itemVariants}
-                onClick={() => router.push("/ngo/login")}
-                className="h-16 px-10 rounded-full bg-white text-black font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-4 transition-all active:scale-95"
+                onClick={() => handleNavigation("/ngo/login")}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="group h-16 px-10 rounded-full bg-white/10 border border-white/20 text-white backdrop-blur-md font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-white/20 transition-colors duration-300"
               >
-                NGO Login <ArrowRight className="w-5 h-5" />
+                NGO Login
+                <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1.5" />
               </motion.button>
             </div>
           )}
@@ -237,6 +302,12 @@ export default function HeroSection() {
                     ))}
                   </div>
                 </div>
+                <div className="hidden lg:block border-t border-white/10 pt-8 mt-8">
+                  <p className="text-2xl font-bold text-white">700+</p>
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">
+                    Districts Covered
+                  </p>
+                </div>
               </div>
 
               <div className="flex-1 p-8 sm:p-10 bg-white/[0.02] overflow-y-auto max-h-[70vh] lg:max-h-none">
@@ -276,9 +347,12 @@ export default function HeroSection() {
                           </div>
                           <CustomInput icon={MapPin} placeholder="PIN Code" name="pincode" value={formState.pincode} onChange={handleInputChange} />
                           <div className="mt-6">
+                            <label className="text-sm text-white/50 mb-3 block">
+                              Focus Areas (Select all that apply)
+                            </label>
                             <div className="grid grid-cols-2 gap-2">
                               {focusAreas.map((area) => (
-                                <button key={area.id} type="button" onClick={() => toggleFocusArea(area.id)} className={`p-3 rounded-xl text-left text-sm flex items-center gap-2 transition-all ${selectedFocusAreas.includes(area.id) ? "bg-[#FF9933]/20 border-[#FF9933]/50 text-white border" : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10"}`}>
+                                <button key={area.id} type="button" onClick={() => toggleFocusArea(area.id)} className={`p-3 rounded-xl text-left text-sm flex items-center gap-2 transition-all duration-200 ${selectedFocusAreas.includes(area.id) ? "bg-[#FF9933]/20 border-[#FF9933]/50 text-white border" : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10"}`}>
                                   <span>{area.icon}</span><span>{area.label}</span>
                                 </button>
                               ))}
@@ -289,9 +363,17 @@ export default function HeroSection() {
                       {currentStep === 4 && (
                         <>
                           <CustomSelect icon={Users} placeholder="Team Size" options={teamSizeOptions} name="teamSize" value={formState.teamSize} onChange={handleInputChange} />
-                          <CustomSelect icon={IndianRupee} placeholder="Annual Budget" options={budgetRanges} name="budget" value={formState.budget} onChange={handleInputChange} />
-                          <CustomInput icon={Heart} placeholder="Beneficiaries Served" name="beneficiaries" value={formState.beneficiaries} onChange={handleInputChange} />
-                          <CustomInput icon={Target} placeholder="Operating Districts" name="operatingDistricts" value={formState.operatingDistricts} onChange={handleInputChange} />
+                          <CustomSelect icon={IndianRupee} placeholder="Annual Budget Range" options={budgetRanges} name="budget" value={formState.budget} onChange={handleInputChange} />
+                          <CustomInput icon={Heart} placeholder="Beneficiaries Served (Approx. number)" name="beneficiaries" value={formState.beneficiaries} onChange={handleInputChange} />
+                          <CustomInput icon={Target} placeholder="Operating Districts (e.g., 5 districts)" name="operatingDistricts" value={formState.operatingDistricts} onChange={handleInputChange} />
+
+                          <div className="mt-4 p-4 rounded-2xl bg-[#138808]/10 border border-[#138808]/20">
+                            <p className="text-sm text-white/70">
+                              By registering, you agree to join India&apos;s
+                              largest NGO intelligence network and contribute to
+                              national development data.
+                            </p>
+                          </div>
                         </>
                       )}
                     </motion.div>
@@ -303,8 +385,12 @@ export default function HeroSection() {
                         <ArrowLeft className="w-4 h-4" /> Back
                       </button>
                     )}
-                    <button type="submit" className="flex-1 h-14 rounded-xl bg-white text-black font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/90 transition-all">
-                      {currentStep === totalSteps ? <>Complete Registration <CheckCircle2 className="w-5 h-5" /></> : <>Continue <ArrowRight className="w-5 h-5" /></>}
+                    <button type="submit" className="group flex-1 h-14 rounded-xl bg-white text-black font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/90 transition-all relative overflow-hidden">
+                      {currentStep === totalSteps ? (
+                        <>Complete Registration <CheckCircle2 className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" /></>
+                      ) : (
+                        <>Continue <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1.5" /></>
+                      )}
                     </button>
                   </div>
                 </form>
@@ -318,6 +404,66 @@ export default function HeroSection() {
         )}
       </AnimatePresence>
     </>
+  );
+}
+
+// ----------------------------------------------------
+// Custom Crash-Free "God Rays" Background Component
+// ----------------------------------------------------
+function CustomGodRays() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="absolute inset-0 bg-black z-0" />
+
+      {/* Rotating Tricolor Rays - Smoother, more vibrant implementation */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+        className="absolute -top-[100%] -bottom-[100%] -left-[100%] -right-[100%] z-10 opacity-50"
+        style={{
+          background: `conic-gradient(
+            from 0deg,
+            transparent 0deg,
+            rgba(255, 153, 51, 0.8) 45deg, /* Vibrant Saffron */
+            transparent 90deg,
+            transparent 120deg,
+            rgba(255, 255, 255, 0.8) 165deg, /* Bright White */
+            transparent 210deg,
+            transparent 240deg,
+            rgba(19, 136, 8, 0.8) 285deg, /* Deep Green */
+            transparent 330deg,
+            transparent 360deg
+          )`,
+          filter: "blur(100px)",
+        }}
+      />
+
+      {/* Radial Vignette Mask to fade out the edges and ensure text is readable */}
+      <div
+        className="absolute inset-0 z-20"
+        style={{
+          background: "radial-gradient(circle at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 60%, #000000 100%)"
+        }}
+      />
+    </div>
+  );
+}
+
+function AshokaChakra({ size, color }: { size: number; color: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="0.1">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="2" />
+      {[...Array(24)].map((_, i) => (
+        <line
+          key={i}
+          x1="12"
+          y1="12"
+          x2={12 + 10 * Math.cos((i * 15 * Math.PI) / 180)}
+          y2={12 + 10 * Math.sin((i * 15 * Math.PI) / 180)}
+        />
+      ))}
+    </svg>
   );
 }
 
@@ -338,6 +484,11 @@ function CustomSelect({ icon: Icon, placeholder, options, ...props }: any) {
         <option value="" disabled className="bg-[#0a0a0a] text-white/30">{placeholder}</option>
         {options.map((opt: string) => <option key={opt} value={opt} className="bg-[#0a0a0a] text-white">{opt}</option>)}
       </select>
+      <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
+        <svg className="w-4 h-4 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
     </div>
   );
 }
