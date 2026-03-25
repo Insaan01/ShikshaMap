@@ -95,7 +95,7 @@ export default function LandingPage() {
   }, [selectedState, hoveredState, districts, stateData]);
 
   const handleDistrictClick = (name: string) => {
-    const data = districts?.find((d: any) => d.district_name.toLowerCase() === name.toLowerCase())
+    const data = districts?.find((d: any) => d.district_name?.toLowerCase() === name?.toLowerCase())
       || { district_name: name, schools: DUMMY_DISTRICT_STATS[name]?.schools || "850", literacy: DUMMY_DISTRICT_STATS[name]?.literacy || "68.5%" };
     if (data) setSelectedDistrict(data);
   };
