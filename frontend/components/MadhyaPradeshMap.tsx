@@ -211,17 +211,18 @@ export default function DistrictMap({
         dangerouslySetInnerHTML={{ __html: svgContent }}
       />
 
-      {/* 6. Static Pill Badge (Matches IndiaMap exactly) */}
+      {/* 6. Upgraded, Larger Static Pill Badge */}
       <AnimatePresence>
         {hoveredDistrict && (
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-md px-4 py-1 rounded-full border border-white/20 pointer-events-none z-50"
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 bg-[#050505]/80 backdrop-blur-xl px-8 py-3 sm:px-10 sm:py-4 rounded-full border border-[#138808]/40 shadow-[0_0_30px_rgba(19,136,8,0.25)] pointer-events-none z-50"
           >
-            <p className="text-white text-[10px] font-bold uppercase tracking-widest">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#138808] animate-pulse shadow-[0_0_10px_rgba(19,136,8,0.8)]" />
+            <p className="text-white text-base sm:text-lg font-extrabold uppercase tracking-[0.25em] drop-shadow-md">
               {hoveredDistrict}
             </p>
           </motion.div>
