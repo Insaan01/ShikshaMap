@@ -21,7 +21,8 @@ export default function AdminLogin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === "admin123") {
+    // Updated dummy password to shiksha7
+    if (password === "shiksha7") {
       setLoadingText("Authorization Granted...");
       setIsNavigating(true);
       setTimeout(() => {
