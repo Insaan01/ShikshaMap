@@ -4,6 +4,7 @@ from app.api import map as map_router
 from app.db.base_class import Base
 from app.db.session import engine
 from app.api import ngo as ngo_api
+from app.api import admin as admin_router
 
 app = FastAPI()
 
@@ -21,3 +22,4 @@ app.add_middleware(
 # Use the aliased router name
 app.include_router(map_router.router, prefix="/api/map", tags=["Map Intelligence"])
 app.include_router(ngo_api.router, prefix="/api/ngo", tags=["NGO Operations"])
+app.include_router(admin_router.router, prefix="/api/admin", tags=["admin"])
