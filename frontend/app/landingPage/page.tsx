@@ -123,7 +123,7 @@ export default function LandingPage() {
           onBack={handleBackToNational}
           onLogout={handleLogout}
           onDistrictHover={setHoveredState}
-          onDistrictClick={(d: any) => handleDistrictClick(d.district_name)}
+          onDistrictClick={handleDistrictClick}
         />
         <DistrictPanel
           district={selectedDistrict}
