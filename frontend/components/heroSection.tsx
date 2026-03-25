@@ -48,6 +48,14 @@ const indianStates = [
   "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
   "Uttarakhand", "West Bengal", "Delhi", "Jammu & Kashmir", "Ladakh",
 ];
+const mpDistricts = [
+  "Agar Malwa", "Alirajpur", "Anuppur", "Ashoknagar", "Balaghat", "Barwani", "Betul", "Bhind", "Bhopal",
+  "Burhanpur", "Chhatarpur", "Chhindwara", "Damoh", "Datia", "Dewas", "Dhar", "Dindori", "Guna", "Gwalior",
+  "Harda", "Hoshangabad", "Indore", "Jabalpur", "Jhabua", "Katni", "Khandwa", "Khargone", "Mandla", "Mandsaur",
+  "Morena", "Narsinghpur", "Neemuch", "Panna", "Raisen", "Rajgarh", "Ratlam", "Rewa", "Sagar", "Satna",
+  "Sehore", "Seoni", "Shahdol", "Shajapur", "Sheopur", "Shivpuri", "Sidhi", "Singrauli", "Tikamgarh", "Ujjain",
+  "Umaria", "Vidisha", "Niwari"
+].sort();
 
 const organizationTypes = [
   "Registered Trust", "Society", "Section 8 Company", "Non-Profit Organization",
@@ -84,9 +92,10 @@ export default function HeroSection() {
   const [selectedFocusAreas, setSelectedFocusAreas] = useState<string[]>([]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormState(prev => ({ ...prev, [name]: value }));
-  };
+  const { name, value } = e.target;
+  console.log(`Input Change - ${name}: ${value}`);
+  setFormState(prev => ({ ...prev, [name]: value }));
+};
 
   const handleExpand = () => setIsExpanded(true);
   const handleClose = () => {
@@ -341,10 +350,18 @@ export default function HeroSection() {
                       {currentStep === 3 && (
                         <>
                           <CustomSelect icon={MapPin} placeholder="State" options={indianStates} name="state" value={formState.state} onChange={handleInputChange} />
-                          <div className="grid grid-cols-2 gap-4">
-                            <CustomInput icon={MapPin} placeholder="District" name="district" value={formState.district} onChange={handleInputChange} />
-                            <CustomInput icon={MapPin} placeholder="City/Town" name="city" value={formState.city} onChange={handleInputChange} />
-                          </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              {/* DISTRICT DROPDOWN */}
+                              <CustomSelect
+                                icon={MapPin}
+                                placeholder="District"
+                                options={mpDistricts}
+                                name="district"
+                                value={formState.district}
+                                onChange={handleInputChange}
+                              />
+                              <CustomInput icon={MapPin} placeholder="City/Town" name="city" value={formState.city} onChange={handleInputChange} />
+                            </div>
                           <CustomInput icon={MapPin} placeholder="PIN Code" name="pincode" value={formState.pincode} onChange={handleInputChange} />
                           <div className="mt-6">
                             <label className="text-sm text-white/50 mb-3 block">

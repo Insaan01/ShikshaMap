@@ -3,7 +3,11 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.models.ngo import Organization
 from app.schemas.ngo import OrganizationCreate
-
+from sqlalchemy import func
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from app.db.session import get_db
+from app import models, schemas
 router = APIRouter()
 
 
@@ -12,7 +16,6 @@ router = APIRouter()
 
 @router.get("/list")
 def list_ngos(db: Session = Depends(get_db)):
-    # This pulls all rows from the organizations table in MySQL
     return db.query(Organization).all()
 
 
@@ -39,27 +42,42 @@ def delete_ngo(ngo_id: int, db: Session = Depends(get_db)):
 
 
 @router.post("/register")
-def register_ngo(payload: dict, db: Session = Depends(get_db)):
-    try:
-        # Check if email already exists to prevent the Duplicate Entry crash
-        existing = db.query(Organization).filter(Organization.email == payload['email']).first()
-        if existing:
-            raise HTTPException(status_code=400, detail="Email already registered")
+def register_ngo(ngo_in: OrganizationCreate, db: Session = Depends(get_db)):
 
-        new_ngo = Organization(
-            org_name=payload.get('orgName'),
-            email=payload.get('email'),
-            password=payload.get('password'),
-            state=payload.get('state'),
-            # ... Map the rest of your keys from the payload
-        )
-        db.add(new_ngo)
+    if db.query(models.Organization).filter(models.Organization.email == ngo_in.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    db_ngo = models.Organization(
+        org_name=ngo_in.orgName,
+        email=ngo_in.email,
+        password=ngo_in.password,
+        state=ngo_in.state,
+        district=ngo_in.district,
+        org_type=ngo_in.orgType,
+        reg_number=ngo_in.regNumber,
+        year_founded=ngo_in.yearFounded,
+        contact_name=ngo_in.contactName,
+        phone=ngo_in.phone,
+        designation=ngo_in.designation,
+        website=ngo_in.website,
+        city=ngo_in.city,
+        pincode=ngo_in.pincode,
+        team_size=ngo_in.teamSize,
+        budget=ngo_in.budget,
+        beneficiaries=ngo_in.beneficiaries,
+        focus_areas=ngo_in.focusAreas,
+        is_approved=True
+    )
+
+    try:
+        db.add(db_ngo)
         db.commit()
-        return {"message": "Success"}
+        db.refresh(db_ngo)
+        return db_ngo
     except Exception as e:
         db.rollback()
-        print(f"Database Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @router.post("/login")
@@ -83,17 +101,9 @@ def login_ngo(payload: dict, db: Session = Depends(get_db)):
 
 @router.get("/district/{district_name}")
 def get_ngos_by_district(district_name: str, db: Session = Depends(get_db)):
-    # Case-insensitive search for NGOs in this district
     ngos = db.query(Organization).filter(
-        Organization.district.ilike(f"%{district_name}%"),
+        func.lower(Organization.district) == district_name.lower(),
         Organization.is_approved == True
     ).all()
 
-    return [
-        {
-            "org_name": ngo.org_name,
-            "org_type": ngo.org_type,
-            "focus_areas": ngo.focus_areas,  # Ensure this column exists or map it
-            "website": ngo.website
-        } for ngo in ngos
-    ]
+    return ngos

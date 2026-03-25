@@ -8,15 +8,32 @@ export function useFetch<T>(url: string, initialValue: T) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    if (!url) {
+      setData(initialValue);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API_BASE_URL}${url}`);
       if (!response.ok) throw new Error(`Failed to fetch ${url}`);
+
       const result = await response.json();
-      setData(result);
+
+      console.log(`[API Success - ${url}]:`, result);
+
+      if (Array.isArray(initialValue) && !Array.isArray(result)) {
+         setData(initialValue);
+      } else {
+         setData(result);
+      }
+
     } catch (err) {
+      console.error(`[API Error - ${url}]:`, err);
       setError(err instanceof Error ? err.message : "Unknown error");
+      setData(initialValue);
     } finally {
       setLoading(false);
     }
@@ -38,6 +55,7 @@ export function useDistricts(stateName: string | null) {
 }
 
 export function useDistrictNGOs(districtName: string | null) {
+  // Uses an empty array [] as the safe initialValue
   return useFetch<any[]>(districtName ? `/api/ngo/district/${districtName}` : "", []);
 }
 

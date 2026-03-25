@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.map import District
-from app.models.ngo import Organization, StateMetric
+from app.models.ngo import Organization
+from app.models.map import StateMetric, District
 from app.schemas import StateDataResponse, MetricResponse
 from app.api.deps import get_current_user
 from fastapi import APIRouter, Depends
